@@ -9,6 +9,10 @@ width, height = 640, 480
 screen=pygame.display.set_mode((width, height))
 pygame.display.set_caption('폭주족 피하기')
 
+#bgm
+pygame.mixer.music.load('music.wav')
+pygame.mixer.music.play(-1, 0.0)
+pygame.mixer.music.set_volume(0.25)
 FPS = 60
 fpsClock = pygame.time.Clock()
 playerpos=[100,100] #처음 플레이어위치
@@ -18,10 +22,7 @@ badtimer1=0 #이 값만큼 badtimer 값을 줄인다.
 healthvalue =194
 keys = [False, False, False, False]# 키 입력 체크
 
-#bgm
-pygame.mixer.music.load('bgm.mp3')
-pygame.mixer.music.play(-1, 0.0)
-pygame.mixer.music.set_volume(0.25)
+ 
 #사진파일
 player = pygame.image.load("car.png")
 road = pygame.image.load("road.png")
@@ -35,6 +36,7 @@ youwin = pygame.image.load("youwin.png")
 # 무한 루프
 running = 1 #게임 진행 여부 체크
 exitcode = 0 #승리 / 패배 체크
+exitcode = 2
 while running:
     badtimer-=1
     #화면 준비
@@ -69,8 +71,6 @@ while running:
         if badguy[0]<-64:
             badguys.pop(index)
         badguy[0]-=7
-
-        
         playerect=pygame.Rect(player.get_rect())
         badrect=pygame.Rect(k5.get_rect())
         badrect.top=badguy[1]
@@ -78,18 +78,22 @@ while running:
         if badrect.left<64:
             healthvalue -= random.randint(5,20)
             badguys.pop(index)
+        index1=0
+
+        #충돌체크
+        if playerect.colliderect(badrect):
+            running=0
+            exitcode=0
+            if exitcode==0:
+                screen.blit(gameover,(0,0))
         
-        if badrect.colliderect(playerect):
-            screen.blit(gameover,(0,0))
-            
-            
-        #다음 적
-        index+=1
+        #다음 적    
+        index+=1    
+
     #적 그리기
     for badguy in badguys:
         screen.blit(k5, badguy)
         
-    
     #시간 게이지
     screen.blit(timebar, (5,5))
     for time1 in range(healthvalue):
@@ -143,11 +147,10 @@ while running:
     #막대바가 줄어들면 게임 종료
     if healthvalue<=0:
         running=0
-        exitcode=0
-    if exitcode==0: 
+        exitcode=2
+    if exitcode==2: 
         screen.blit(youwin, (0,0))
     
-
 while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
